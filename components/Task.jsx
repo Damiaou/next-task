@@ -35,7 +35,7 @@ const Task = ({ task }) => {
 			.post(`https://young-ravine-65632.herokuapp.com/history`, {
 				id_user: JSON.parse(localStorage.getItem('user')).id,
 				id_task: task.id,
-				when: new Date(),
+				when: Date.now(),
 			})
 			.then((response) => {
 				console.log('Create history response', response.data);
