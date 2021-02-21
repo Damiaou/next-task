@@ -7,7 +7,9 @@ export default function Home() {
 	const router = useRouter();
 
 	const [user, setUser] = useLocalStorage('user');
+	// Update user in localstorage
 	const [home, setHome] = useLocalStorage('home');
+	// Update Home in localstorage
 
 	useEffect(() => {
 		console.log('user in index', user);

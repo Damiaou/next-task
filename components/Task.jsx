@@ -2,28 +2,27 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as Icons from 'components/Icons';
 import { useRouter } from 'next/router';
+import { Fire } from './Icons';
 
 const Task = ({ task }) => {
-	const router = useRouter();
 	console.log('Task component render');
 	// I need the history for a task, we display it
 	const [history, setHistory] = useState([]);
 	const [clicked, setClicked] = useState(false);
+	const [reload, setReload] = useState(false);
 	useEffect(() => {
 		axios
 			.post(`https://young-ravine-65632.herokuapp.com/historyForTask`, {
 				task: task.id,
 			})
 			.then((response) => {
+				console.log('history', response.data);
 				setHistory(response.data);
-				if (!response.data.length) {
-					setHistory(['No history for the week']);
-				}
 			});
-	}, []);
+	}, [reload]);
 
-	const clickHandler = (e) => {
-		setClicked(true);
+	const clickHandler = () => {
+		setClicked(!clicked);
 	};
 
 	/**
@@ -31,27 +30,32 @@ const Task = ({ task }) => {
 	 * @param {object} task Task object
 	 */
 	const addHistory = async (task) => {
-		axios
-			.post(`https://young-ravine-65632.herokuapp.com/history`, {
-				id_user: JSON.parse(localStorage.getItem('user')).id,
-				id_task: task.id,
-				when: Date.now(),
-			})
-			.then((response) => {
-				console.log('Create history response', response.data);
-			});
+		if (history.length < task.repeat) {
+			axios
+				.post(`https://young-ravine-65632.herokuapp.com/history`, {
+					id_user: JSON.parse(localStorage.getItem('user')).id,
+					id_task: task.id,
+					when: Date.now(),
+				})
+				.then((response) => {
+					console.log('Create history response', response.data);
+				});
+		} else {
+			alert(`Update the task if you need to make it more than ${task.repeat} times`);
+		}
 	};
 
 	const historyhandler = (e) => {
 		e.stopPropagation();
 		addHistory(task);
 		setClicked(false);
+		setReload(!reload);
 	};
 
 	return (
 		<>
 			<div
-				onClick={!clicked ? clickHandler : undefined}
+				onClick={clickHandler}
 				className="border-t-2 border-green-200 transition duration-500 ease-in-out bg-green-100 text-green-700 p-2  shadow hover:shadow-lg hover:bg-green-200"
 			>
 				{clicked ? (
@@ -67,10 +71,19 @@ const Task = ({ task }) => {
 					</div>
 				) : (
 					<div className="flex flex-row justify-between divide-x-2 divide-green-200  cursor-pointer">
-						<span key={task.id}>&#9679; {task.label}</span>
+						<span key={task.id} className="font-semibold">
+							{task.label}
+						</span>
 
 						<span className="ml-2">
-							&nbsp;{history.length}/{task.repeat}
+							&nbsp;
+							{history.length / task.repeat === 1 ? (
+								<span>
+									<Fire className="inline" />
+								</span>
+							) : (
+								`${history.length}/${task.repeat}`
+							)}
 						</span>
 					</div>
 				)}

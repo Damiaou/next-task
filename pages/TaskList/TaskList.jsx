@@ -6,6 +6,8 @@ import Card from 'components/Card';
 import Task from 'components/Task';
 import useSWR from 'swr';
 import { format } from 'date-fns';
+import Button from 'components/Button';
+import axios from 'axios';
 
 const TaskList = () => {
 	const [user, setUser] = useLocalStorage('user');
@@ -22,6 +24,44 @@ const TaskList = () => {
 	if (tasks !== data) {
 		setTasks(data);
 	}
+
+	const [newTask, setNewTask] = useState({ label: '', repeat: 1 });
+	const [taskToAdd, setTaskToAdd] = useState(false);
+
+	useEffect(() => {
+		if (newTask.label && newTask.repeat) {
+			setTaskToAdd(true);
+		} else {
+			setTaskToAdd(false);
+		}
+	}, [newTask]);
+
+	const changeTaskLabel = (e) => {
+		console.log(e.target.value);
+		setNewTask({ repeat: newTask.repeat, label: e.target.value });
+	};
+
+	const changeTaskRepeat = (e) => {
+		console.log(e.target.value);
+		setNewTask({ label: newTask.label, repeat: e.target.value });
+	};
+
+	const saveTask = (e) => {
+		e.preventDefault();
+		axios
+			.post(`https://young-ravine-65632.herokuapp.com/task`, {
+				home_hash: home.hash,
+				label: newTask.label,
+				repeat: newTask.repeat,
+			})
+			.then((response) => {
+				console.log(response.data);
+				setNewTask({ label: '', repeat: 1 });
+			});
+		console.log('Saving !');
+	};
+
+	const displayAdd = !taskToAdd ? 'invisible' : undefined;
 
 	return (
 		<>
@@ -45,6 +85,30 @@ const TaskList = () => {
 					<div>
 						<div className="divide-green-300 rounded space-y-3">
 							{tasks ? tasks.map((t) => <Task key={t.id} task={t} />) : 'No task for this house.'}
+							<form onSubmit={(e) => saveTask(e)}>
+								<div>
+									<input
+										minlength="4"
+										onChange={(e) => changeTaskLabel(e)}
+										value={newTask.label}
+										placeholder="Add task"
+										type="text"
+										className="w-48 bg-transparent focus:border-pink-200 outline-none text-center border-b-2 border-green-200  placeholder-green-200"
+									/>
+									<input
+										onChange={(e) => changeTaskRepeat(e)}
+										placeholder="Repetition"
+										value={newTask.repeat}
+										type="number"
+										name="repeat"
+										id="repeat"
+										className="w-8 bg-transparent focus:border-pink-200 outline-none text-center border-b-2 border-green-200  placeholder-green-300"
+									/>
+								</div>
+								<div className={`transition duration-500 ease-in-out ${displayAdd}`}>
+									<Button className="w-full mt-4">Save</Button>
+								</div>
+							</form>
 						</div>
 					</div>
 				</Card>
