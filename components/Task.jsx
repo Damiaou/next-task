@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as Icons from 'components/Icons';
-import { useRouter } from 'next/router';
 import { Fire } from './Icons';
 
 const Task = ({ task }) => {

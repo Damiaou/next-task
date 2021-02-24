@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import useLocalStorage from 'hooks/useLocalStorage';
 import TopBar from 'components/TopBar';
 import Layout from 'components/Layout';
 import Card from 'components/Card';
@@ -10,19 +9,27 @@ import Button from 'components/Button';
 import axios from 'axios';
 
 const TaskList = () => {
-	const [user, setUser] = useLocalStorage('user');
-	const [home, setHome] = useLocalStorage('home');
+	const [user, setUser] = useState(null);
+	const [home, setHome] = useState(null);
+	const [reload, setReload] = useState(false);
+
+	useEffect(() => {
+		setUser(JSON.parse(localStorage.getItem('user')));
+		setHome(JSON.parse(localStorage.getItem('home')));
+	}, []);
+
 	const [tasks, setTasks] = useState([]);
 	const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
 	const fetcher = (url) => fetch(url).then((r) => r.json());
 
 	const { data, error } = useSWR(
-		home && !data ? `https://young-ravine-65632.herokuapp.com/taskForHome/${home.hash}` : '',
+		(home && !data) || reload ? `https://young-ravine-65632.herokuapp.com/taskForHome/${home.hash}` : '',
 		fetcher
 	);
 	if (tasks !== data) {
 		setTasks(data);
+		setReload(false);
 	}
 
 	const [newTask, setNewTask] = useState({ label: '', repeat: 1 });
@@ -57,6 +64,7 @@ const TaskList = () => {
 			.then((response) => {
 				console.log(response.data);
 				setNewTask({ label: '', repeat: 1 });
+				setReload(true);
 			});
 		console.log('Saving !');
 	};
@@ -88,7 +96,7 @@ const TaskList = () => {
 							<form onSubmit={(e) => saveTask(e)}>
 								<div>
 									<input
-										minlength="4"
+										minLength="4"
 										onChange={(e) => changeTaskLabel(e)}
 										value={newTask.label}
 										placeholder="Add task"
@@ -102,7 +110,7 @@ const TaskList = () => {
 										type="number"
 										name="repeat"
 										id="repeat"
-										className="w-8 bg-transparent focus:border-pink-200 outline-none text-center border-b-2 border-green-200  placeholder-green-300"
+										className="w-8 bg-transparent focus:border-pink-200 outline-none text-center border-b-2 border-green-200  placeholder-green-200"
 									/>
 								</div>
 								<div className={`transition duration-500 ease-in-out ${displayAdd}`}>
