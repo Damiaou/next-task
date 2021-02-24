@@ -44,10 +44,11 @@ const Login = () => {
 			<Card>
 				<form onSubmit={(e) => handleSubmit(e)}>
 					<fieldset className="p-4">
-						<legend className="text-lg font-semibold text-center mb-8">
-							Please, enter your informations below
-						</legend>
 						<div className="flex flex-col w-48 h-64 space-y-8">
+							<legend className="text-lg font-semibold text-center mb-4">
+								Please, enter your informations below
+							</legend>
+
 							<label htmlFor="homeHash" className="text-center mr-2">
 								Your home hash
 							</label>
