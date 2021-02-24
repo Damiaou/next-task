@@ -44,7 +44,7 @@ const Login = () => {
 			<Card>
 				<form onSubmit={(e) => handleSubmit(e)}>
 					<fieldset className="p-4">
-						<div className="flex flex-col w-48 h-64 space-y-8">
+						<div className="flex flex-col w-48 h-96 space-y-8">
 							<legend className="text-lg font-semibold text-center mb-4">
 								Please, enter your informations below
 							</legend>
