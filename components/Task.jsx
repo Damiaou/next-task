@@ -22,17 +22,17 @@ const Task = ({ task }) => {
 	const [histories, dispatch] = useReducer(historyReducer, []);
 	const add = (payload) => dispatch({ type: 'ADD', payload });
 	const set = (payload) => dispatch({ type: 'SET', payload });
-
-	const [history, setHistory] = useState([]);
 	const [clicked, setClicked] = useState(false);
 	useEffect(() => {
-		axios
-			.post(`https://young-ravine-65632.herokuapp.com/historyForTask`, {
-				task: task.id,
-			})
-			.then((response) => {
-				set(response.data);
-			});
+		if (task) {
+			axios
+				.post(`https://young-ravine-65632.herokuapp.com/historyForTask`, {
+					task: task.id,
+				})
+				.then((response) => {
+					set(response.data);
+				});
+		}
 	}, [task]);
 
 	const clickHandler = () => {

@@ -85,19 +85,6 @@ const TaskList = () => {
 			<Layout>
 				<Card className="flex flex-col">
 					<h1 className="p-2 mb-4 text-center font-semibold text-xl text-white">Task for the week</h1>
-					<div className="font-bold text-center mb-4">
-						<input
-							type="date"
-							name="date"
-							id="date"
-							value={date}
-							onChange={(e) => {
-								setDate(e.target.value);
-							}}
-							className="rounded p-2 ring-2 ring-green-500 text-green-400"
-						/>
-						{/* Soon the prev, next and open datepicker button */}
-					</div>
 					<div>
 						<div className="divide-green-300 rounded space-y-3">
 							{tasks && tasks.length > 0 && Array.isArray(tasks)
