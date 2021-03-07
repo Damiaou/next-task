@@ -1,36 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import TopBar from 'components/TopBar';
 import Layout from 'components/Layout';
 import Card from 'components/Card';
 import Task from 'components/Task';
-import useSWR from 'swr';
 import { format } from 'date-fns';
 import Button from 'components/Button';
 import axios from 'axios';
 
+const taskReducer = (tasks, { type, payload }) => {
+	switch (type) {
+		case 'ADD': {
+			return [...tasks, payload];
+		}
+		case 'SET': {
+			return payload;
+		}
+		default: {
+			console.info(`Action not handled : ${type}`);
+		}
+	}
+};
+
 const TaskList = () => {
 	const [user, setUser] = useState(null);
 	const [home, setHome] = useState(null);
-	const [reload, setReload] = useState(false);
-
 	useEffect(() => {
 		setUser(JSON.parse(localStorage.getItem('user')));
 		setHome(JSON.parse(localStorage.getItem('home')));
 	}, []);
 
-	const [tasks, setTasks] = useState([]);
+	const [tasks, dispatch] = useReducer(taskReducer, []);
+	const addTask = (payload) => dispatch({ type: 'ADD', payload });
+	const setTask = (payload) => dispatch({ type: 'SET', payload });
+
+	useEffect(() => {
+		axios.get(home ? `https://young-ravine-65632.herokuapp.com/taskForHome/${home.hash}` : '').then((response) => {
+			setTask(response.data);
+		});
+	}, [home]);
+
 	const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-
-	const fetcher = (url) => fetch(url).then((r) => r.json());
-
-	const { data, error } = useSWR(
-		(home && !data) || reload ? `https://young-ravine-65632.herokuapp.com/taskForHome/${home.hash}` : '',
-		fetcher
-	);
-	if (tasks !== data) {
-		setTasks(data);
-		setReload(false);
-	}
 
 	const [newTask, setNewTask] = useState({ label: '', repeat: 1 });
 	const [taskToAdd, setTaskToAdd] = useState(false);
@@ -44,27 +53,25 @@ const TaskList = () => {
 	}, [newTask]);
 
 	const changeTaskLabel = (e) => {
-		console.log(e.target.value);
 		setNewTask({ repeat: newTask.repeat, label: e.target.value });
 	};
 
 	const changeTaskRepeat = (e) => {
-		console.log(e.target.value);
 		setNewTask({ label: newTask.label, repeat: e.target.value });
 	};
 
 	const saveTask = (e) => {
 		e.preventDefault();
 		axios
-			.post(`https://young-ravine-65632.herokuapp.com/task`, {
-				home_hash: home.hash,
+			.post(`https://young-ravine-65632.herokuapp.com/task/`, {
 				label: newTask.label,
 				repeat: newTask.repeat,
+				home_hash: home.hash,
 			})
 			.then((response) => {
-				console.log(response.data);
+				setNewTask(response.data);
+				addTask(newTask);
 				setNewTask({ label: '', repeat: 1 });
-				setReload(true);
 			});
 		console.log('Saving !');
 	};
@@ -74,6 +81,7 @@ const TaskList = () => {
 	return (
 		<>
 			<TopBar user={user} home={home} />
+
 			<Layout>
 				<Card className="flex flex-col">
 					<h1 className="p-2 mb-4 text-center font-semibold text-xl text-white">Task for the week</h1>
@@ -92,9 +100,11 @@ const TaskList = () => {
 					</div>
 					<div>
 						<div className="divide-green-300 rounded space-y-3">
-							{tasks ? tasks.map((t) => <Task key={t.id} task={t} />) : 'No task for this house.'}
+							{tasks && tasks.length > 0 && Array.isArray(tasks)
+								? tasks.map((t) => <Task key={t.id} task={t} />)
+								: 'No task for this house.'}
 							<form onSubmit={(e) => saveTask(e)}>
-								<div>
+								<div className="space-x-3">
 									<input
 										minLength="4"
 										onChange={(e) => changeTaskLabel(e)}

@@ -1,24 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import axios from 'axios';
 import * as Icons from 'components/Icons';
 import { Fire } from './Icons';
 
+const historyReducer = (histories, { type, payload }) => {
+	switch (type) {
+		case 'SET': {
+			return payload;
+		}
+		case 'ADD': {
+			return [...histories, payload];
+		}
+		default: {
+			console.info(`Type not handled : ${type}`);
+		}
+	}
+};
+
 const Task = ({ task }) => {
-	console.log('Task component render');
 	// I need the history for a task, we display it
+	const [histories, dispatch] = useReducer(historyReducer, []);
+	const add = (payload) => dispatch({ type: 'ADD', payload });
+	const set = (payload) => dispatch({ type: 'SET', payload });
+
 	const [history, setHistory] = useState([]);
 	const [clicked, setClicked] = useState(false);
-	const [reload, setReload] = useState(false);
 	useEffect(() => {
 		axios
 			.post(`https://young-ravine-65632.herokuapp.com/historyForTask`, {
 				task: task.id,
 			})
 			.then((response) => {
-				console.log('history', response.data);
-				setHistory(response.data);
+				set(response.data);
 			});
-	}, [reload]);
+	}, [task]);
 
 	const clickHandler = () => {
 		setClicked(!clicked);
@@ -29,7 +44,7 @@ const Task = ({ task }) => {
 	 * @param {object} task Task object
 	 */
 	const addHistory = async (task) => {
-		if (history.length < task.repeat) {
+		if (histories.length < task.repeat) {
 			axios
 				.post(`https://young-ravine-65632.herokuapp.com/history`, {
 					id_user: JSON.parse(localStorage.getItem('user')).id,
@@ -38,6 +53,7 @@ const Task = ({ task }) => {
 				})
 				.then((response) => {
 					console.log('Create history response', response.data);
+					add(response.data);
 				});
 		} else {
 			alert(`Update the task if you need to make it more than ${task.repeat} times`);
@@ -48,7 +64,6 @@ const Task = ({ task }) => {
 		e.stopPropagation();
 		addHistory(task);
 		setClicked(false);
-		setReload(!reload);
 	};
 
 	return (
@@ -76,12 +91,12 @@ const Task = ({ task }) => {
 
 						<span className="ml-2">
 							&nbsp;
-							{history.length / task.repeat === 1 ? (
+							{histories.length / task.repeat === 1 ? (
 								<span>
 									<Fire className="inline" />
 								</span>
 							) : (
-								`${history.length}/${task.repeat}`
+								`${histories.length}/${task.repeat}`
 							)}
 						</span>
 					</div>
