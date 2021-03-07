@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from 'components/Button';
 import Card from 'components/Card';
 import Layout from 'components/Layout';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 const Login = () => {
 	const router = useRouter();
@@ -11,37 +12,25 @@ const Login = () => {
 	let [userEmail, setUserEmail] = useState('');
 	let [isSubmit, setIsSubmit] = useState(false);
 	let [loading, setLoading] = useState(false);
+	const [home, setHome] = useState(null);
 
-	const fetcher = (url) => fetch(url).then((r) => r.json());
-
-	const { data, error } = useSWR(
-		isSubmit && userEmail ? `https://young-ravine-65632.herokuapp.com/user/${userEmail}` : '',
-		fetcher
-	);
-
-	const user = data ? data : null;
-
-	if (error) {
-		setLoading(false);
-		setIsSubmit(false);
-	}
-
-	if (user && loading) {
-		setLoading(false);
-		// redirect sur la home && localStorage
-
-		setUserEmail('user', user);
-		if (typeof window !== undefined) {
-			localStorage.setItem('user', JSON.stringify(user));
-		}
-
-		router.push('/');
-	}
+	useEffect(() => {
+		setHome(JSON.parse(localStorage.getItem('home')));
+	}, []);
 
 	const handleSubmit = (e) => {
 		setLoading(true);
 		e.preventDefault();
-		setIsSubmit(true);
+		axios
+			.post('https://young-ravine-65632.herokuapp.com/login', {
+				email: userEmail,
+				home_hash: home.hash,
+			})
+			.then((response) => {
+				console.log('saving and redirecting');
+				localStorage.setItem('user', JSON.stringify(response.data));
+				router.push('/');
+			});
 	};
 
 	return (

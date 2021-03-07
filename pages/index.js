@@ -12,13 +12,13 @@ export default function Home() {
 	useEffect(() => {
 		const user = JSON.parse(localStorage.getItem('user'));
 		const home = JSON.parse(localStorage.getItem('home'));
-		if (!home) {
-			console.log('home in index', home);
-			router.push('home/login');
-		}
 		if (!user) {
 			console.log('user in index', user);
 			router.push('/user/login');
+		}
+		if (!home) {
+			console.log('home in index', home);
+			router.push('home/login');
 		}
 	}, []);
 
