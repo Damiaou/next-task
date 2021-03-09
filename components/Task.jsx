@@ -44,6 +44,7 @@ const Task = ({ task }) => {
 	 * @param {object} task Task object
 	 */
 	const addHistory = async (task) => {
+		console.log(task);
 		if (histories.length < task.repeat) {
 			axios
 				.post(`https://young-ravine-65632.herokuapp.com/history`, {

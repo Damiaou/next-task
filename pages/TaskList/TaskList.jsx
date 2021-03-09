@@ -69,8 +69,7 @@ const TaskList = () => {
 				home_hash: home.hash,
 			})
 			.then((response) => {
-				setNewTask(response.data);
-				addTask(newTask);
+				addTask(response.data);
 				setNewTask({ label: '', repeat: 1 });
 			});
 		console.log('Saving !');

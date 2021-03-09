@@ -4,8 +4,6 @@
  * @param {string} height height
  */
 function Plus({ width = '20', height = '20', className }) {
-	console.log('width', width);
-	console.log('height', height);
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
