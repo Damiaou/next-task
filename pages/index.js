@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import Head from 'next/head';
 import TaskList from './TaskList/TaskList';
 
 export default function Home() {
@@ -22,5 +23,14 @@ export default function Home() {
 		}
 	}, []);
 
-	return <TaskList />;
+	return (
+		<>
+			<Head>
+				<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+				<title>TaksList</title>
+				<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+			</Head>
+			<TaskList />
+		</>
+	);
 }
